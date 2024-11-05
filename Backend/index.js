@@ -12,7 +12,6 @@ app.listen(port, () => {
 
 app.use(express.json()); // to handle JSON data
 
-// Basic routes for the API
 app.get("/api", (req, res) => {
     res.send("Hello World!");
 })
