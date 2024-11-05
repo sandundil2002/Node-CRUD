@@ -38,3 +38,46 @@ app.post("/api/items", async (req, res) => {
     res.status(500).json({ error: "Error creating item" });
   }
 });
+
+// Update an item by ID
+app.put('/api/items/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, price } = req.body;
+  
+  try {
+    const [result] = await db.query(
+      'UPDATE items SET name = ?, price = ? WHERE id = ?',
+      [name, price, id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    
+    res.json({ message: 'Item updated successfully' });
+  } catch (error) {
+    console.error("Error updating item:", error);
+    res.status(500).json({ error: 'Error updating item' });
+  }
+});
+
+// Delete an item by ID
+app.delete('/api/items/:id', async (req, res) => {
+  const { id } = req.params;
+  
+  try {
+    const [result] = await db.query(
+      'DELETE FROM items WHERE id = ?',
+      [id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Item not found' });
+    }
+    
+    res.json({ message: 'Item deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    res.status(500).json({ error: 'Error deleting item' });
+  }
+});
