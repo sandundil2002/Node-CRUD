@@ -10,35 +10,31 @@ app.listen(port, () => {
 app.use(express.json()); // to handle JSON data
 
 // Basic routes for the API
-app.get("", (req, res) => {
+app.get("/api", (req, res) => {
     res.send("Hello World!");
 })
 
-app.get("/api/items", (req, res) => {
-  res.json({ message: "List of items" });
+// Get all items
+app.get('/api/items', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM items');
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching items' });
+  }
 });
 
-app.post("/api/items", (req, res) => {
-  const newItem = req.body;
-  // Add the item to the database (for now, just simulate it)
-  res.status(201).json({ message: "Item created", item: newItem });
-});
-
-app.get("/api/items/:id", (req, res) => {
-  const itemId = req.params.id;
-  // Fetch the item by ID (simulating for now)
-  res.json({ message: `Details of item ${itemId}` });
-});
-
-app.put("/api/items/:id", (req, res) => {
-  const itemId = req.params.id;
-  const updatedItem = req.body;
-  // Update the item (simulated)
-  res.json({ message: `Item ${itemId} updated`, item: updatedItem });
-});
-
-app.delete("/api/items/:id", (req, res) => {
-  const itemId = req.params.id;
-  // Delete the item (simulated)
-  res.json({ message: `Item ${itemId} deleted` });
+// Add a new item
+app.post("/api/items", async (req, res) => {
+  const { name, price } = req.body;
+  try {
+    const [result] = await db.query(
+      "INSERT INTO items (name, price) VALUES (?, ?)",
+      [name, price]
+    );
+    res.status(201).json({ message: "Item created", itemId: result.insertId });
+  } catch (error) {
+    console.error("Error in SQL query:", error); // Log the exact error
+    res.status(500).json({ error: "Error creating item" });
+  }
 });
